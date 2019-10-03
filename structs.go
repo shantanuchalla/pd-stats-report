@@ -2,6 +2,9 @@ package main
 
 type PDResponse struct {
 	Incidents []Incident `json:"incidents"`
+	Limit     int        `json:"limit"`
+	Offset    int        `json:"offset"`
+	More      bool       `json:"more"`
 }
 
 type Incident struct {

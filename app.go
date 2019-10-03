@@ -27,10 +27,19 @@ func main() {
 
 	period := *since + " to " + *until
 
-	pdResponse := getPDInfo(*apiKey, *since, *until, *team)
+	pdResponse := getPDInfo(*apiKey, *since, *until, *team, 0)
+
+	pds := pdResponse.Incidents
+
+	more := pdResponse.More
+	for more {
+		pdResponse = getPDInfo(*apiKey, *since, *until, *team, pdResponse.Limit + pdResponse.Offset)
+		pds = append(pds, pdResponse.Incidents...)
+		more = pdResponse.More
+	}
 
 	var data map[string]*pdInfo = make(map[string]*pdInfo)
-	for _, incident := range pdResponse.Incidents {
+	for _, incident := range pds {
 		info, ok := data[incident.Title]
 		if ok {
 			info.count++

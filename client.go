@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -16,7 +17,7 @@ func initClient() {
 	}
 }
 
-func getPDInfo(authKey string, since string, until string, team string) PDResponse {
+func getPDInfo(authKey string, since string, until string, team string, offset int) PDResponse {
 	request, err := http.NewRequest("GET", "https://api.pagerduty.com/incidents", nil)
 	if err != nil {
 		log.Fatalln(err)
@@ -24,8 +25,6 @@ func getPDInfo(authKey string, since string, until string, team string) PDRespon
 
 	auth := "Token token="
 	auth += authKey
-
-	log.Println(auth)
 
 	request.Header.Set("Authorization", auth)
 	request.Header.Set("Accept", "application/vnd.pagerduty+json;version=2")
@@ -36,6 +35,8 @@ func getPDInfo(authKey string, since string, until string, team string) PDRespon
 	query.Add("team_ids[]", team)
 	query.Add("urgencies[]", "high")
 	query.Add("time_zone", "Asia/Calcutta")
+	query.Add("limit", strconv.Itoa(100))
+	query.Add("offset", strconv.Itoa(offset))
 
 	request.URL.RawQuery = query.Encode()
 
@@ -52,7 +53,7 @@ func getPDInfo(authKey string, since string, until string, team string) PDRespon
 	}
 
 	log.Println(resp.Status)
-	
+
 	var response PDResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
